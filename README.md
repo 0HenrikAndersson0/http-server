@@ -1,5 +1,8 @@
 # Go API Lab
 
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/452f460a-24a8-4363-a6ad-1c96892b0b2f" />
+
+
 A simple, lightweight Go web server designed to serve static HTML pages with support for both HTTP and HTTPS.
 
 ## Features
