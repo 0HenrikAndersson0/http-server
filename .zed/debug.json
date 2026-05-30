@@ -1,0 +1,9 @@
+[
+  {
+    "adapter": "Delve",
+    "label": "Debug API",
+    "request": "launch",
+    "mode": "debug",
+    "program": "./cmd/api"
+  }
+]

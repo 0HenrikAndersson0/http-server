@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    {
+      "name": "Run API",
+      "command": "go run ./cmd/api/...",
+      "args": [],
+      "label": "run-api"
+    }
+  ]
+}
