@@ -2,20 +2,20 @@
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/452f460a-24a8-4363-a6ad-1c96892b0b2f" />
 
-A simple, lightweight Go web server designed to serve static HTML pages with support for both HTTP and HTTPS, and a dynamic file-sharing mode.
+A simple, lightweight Go web server designed to serve static HTML pages with support for both HTTP and HTTPS, dynamic file-sharing, and JWT authentication.
 
 ## Features
 
 - **Static Page Serving:** Automatically routes requests to HTML files in the `Pages/` directory.
-- **Dynamic File Listing:** Automatically generates an index of files available in the `Files/` directory.
-- **Dual Protocol Support:** Seamlessly switches between HTTP and HTTPS based on configuration.
-- **JSON Configuration:** Easy setup via `conf.json`.
-- **404 Handling:** Custom 404 page support.
-- **Basic Caching:** Infrastructure for caching page paths.
+- **Dynamic File Listing:** Automatically generates an index of files available in a configurable directory.
+- **JWT Authentication:** Secure login system using JSON Web Tokens stored in HTTP-only cookies.
+- **Dual Protocol Support:** Seamlessly switches between HTTP and HTTPS.
+- **JSON Configuration:** Centralized setup via `conf.json`.
+- **Custom Error Handling:** Styled 404 page support.
 
 ## Prerequisites
 
-- [Go](https://go.dev/doc/install) (version 1.26.2 or later recommended)
+- [Go](https://go.dev/doc/install) (version 1.22+ for modern routing syntax)
 - [OpenSSL](https://www.openssl.org/) (optional, for generating self-signed certificates)
 
 ## Getting Started
@@ -35,50 +35,55 @@ Create or modify `conf.json` in the root directory:
 
 ```json
 {
-  "port": 8080,
+  "port": 1337,
   "certFile": "cert.pem",
   "certKey": "key.pem",
-  "isFileServer": false,
+  "isFileServer": true,
   "fileServerRootPath": "Files"
 }
 ```
 
-*   `port`: The port number for the server to listen on.
-*   `certFile` / `certKey`: Paths to SSL certificate files for HTTPS. Leave empty for HTTP.
-*   `isFileServer`: If `true`, the root URL (`/`) will display a dynamic list of files.
-*   `fileServerRootPath`: The name of the directory containing the files to serve (defaults to "Files").
+*   `port`: The port number for the server.
+*   `certFile` / `certKey`: Paths to SSL certificate files. Leave empty for HTTP.
+*   `isFileServer`: If `true`, the root URL (`/`) displays the dynamic file list.
+*   `fileServerRootPath`: The directory name for served assets.
 
-### 3. File Server Mode
+### 3. Authentication
+
+The server includes a built-in JWT authentication system:
+- **Login:** Access `/logIn` to enter credentials.
+- **Security:** Upon successful login, a JWT is issued as an `HttpOnly` cookie.
+- **Protected Area:** Accessing `/Auth/IamSecret` requires a valid token.
+- **Logout:** Use `/logout` to terminate the session.
+
+### 4. File Server Mode
 
 When `isFileServer` is set to `true`:
-- Navigating to `/` will show a styled list of all assets inside the directory specified by `fileServerRootPath`.
-- Files can be downloaded directly by clicking their names.
-- Static pages in `Pages/` remain accessible via their specific paths (e.g., `/main` or `/test`).
-
-### 4. Generating SSL Certificates (Optional)
-
-To test HTTPS locally, generate a self-signed certificate:
-
-```bash
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj "/CN=localhost"
-```
+- The root URL shows a styled index of the `fileServerRootPath` directory.
+- Files are directly downloadable via the UI.
+- Static pages remain accessible via their specific paths.
 
 ### 5. Running the Server
 
 ```bash
-go run main.go
+# Run all files in the current package
+go run .
 ```
 
 ## Project Structure
 
-- `main.go`: The core server logic and request handling.
-- `conf.json`: Configuration settings for the server.
-- `Pages/`: Directory containing static `.html` files.
-- `Files/`: Directory containing assets available for download.
-- `FileList.html`: The HTML template used for the dynamic file listing.
-- `.gitignore`: Standard Go and environment exclusions.
+- `main.go`: Primary server and routing logic.
+- `auth.go`: JWT generation, validation, and login logic.
+- `conf.json`: Server configuration.
+- `Pages/`: Static HTML pages (e.g., `main.html`, `logIn.html`).
+- `Pages/Auth/`: Protected HTML pages (e.g., `IamSecret.html`).
+- `Files/`: Assets for the dynamic file server.
+- `FileList.html`: Template for the file listing UI.
 
 ## Development
 
-- **Add a Page:** Create a new `.html` file in `Pages/` (e.g., `Pages/about.html` -> `/about`).
-- **Add an Asset:** Drop any file into `Files/` to make it appear in the File Server index.
+- **Add a Protected Page:** Place new `.html` files in `Pages/Auth/`.
+- **Generate Certs:**
+  ```bash
+  openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj "/CN=localhost"
+  ```

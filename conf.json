@@ -2,6 +2,9 @@
   "port": 1337,
   "certFile": "/Users/henrikandersson/Developer/go/api/cert.pem",
   "certKey": "/Users/henrikandersson/Developer/go/api/key.pem",
-  "isFileServer": true,
-  "fileServerRootPath": "Files"
+  "isFileServer": false,
+  "fileServerRootPath": "Files",
+  "secretPassword": "01010abc1230202",
+  "secretUserName": "s3cReT",
+  "hmacSampleSecret": "iamsecret"
 }

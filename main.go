@@ -32,18 +32,41 @@ func main() {
 		return
 	}
 
+	mux.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "login.html")
+	})
+
+	mux.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
+		isValid := FormAuthValidation(r, config)
+		if !isValid {
+			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		}
+		setJWTCookie(w, config)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path, _ := getPathAndQuery(r)
 
 		// If we are in File Server mode, serve the generated list for the root
 		if config.IsFileServer && path == "/" {
+			isAuth := AuthenticateRequest(r, w, config)
+			if !isAuth {
+				return
+			}
 			fmt.Printf("Serving dynamic file list\n")
 			fmt.Fprint(w, serveFileList(config.FileServerRootPath))
 			return
 		}
 
 		// Otherwise, serve standard pages or files
-		page := getPageFromPath(path, config)
+		page, requiresAuth := getPageFromPath(path, config)
+		if requiresAuth {
+			isAuth := AuthenticateRequest(r, w, config)
+			if !isAuth {
+				return
+			}
+		}
 		fmt.Printf("Serving: %s\n", page)
 		http.ServeFile(w, r, page)
 	})
@@ -58,6 +81,9 @@ type Config struct {
 	CertKey            string `json:"certKey"`
 	IsFileServer       bool   `json:"isFileServer"`
 	FileServerRootPath string `json:fileServerRootPath`
+	SecretPassword     string `json:secretPassword`
+	SecretUserName     string `json:secretUserName`
+	HmacSampleSecret   string `json:hmacSampleSecret`
 }
 
 func startServer(config Config, muxInstance *http.ServeMux) bool {
@@ -100,15 +126,15 @@ func getFileServerPath(config Config) string {
 	return fmt.Sprintf("/%s/", config.FileServerRootPath)
 }
 
-func getPageFromPath(path string, config Config) string {
+func getPageFromPath(path string, config Config) (string, bool) {
 	if strings.HasPrefix(path, getFileServerPath(config)) {
-		return path[1:]
+		return path[1:], false
 	}
 	switch path {
 	case "/":
-		return "Pages/main.html"
+		return "Pages/main.html", false
 	case "/files":
-		return "FileList.html"
+		return "FileList.html", false
 	default:
 		return findPage(path[1:], true)
 	}
@@ -158,19 +184,23 @@ func createFileListHtml(files []string) string {
 	return fileListHtml.String()
 }
 
-func findPage(path string, useCache bool) string {
+func findPage(path string, useCache bool) (string, bool) {
 	if useCache {
 		content, exists := getFromCache(path)
 		if exists {
-			return content
+			return content, false
 		}
 	}
 
 	fullPath := "Pages/" + path + ".html"
 	if _, err := os.Stat(fullPath); err == nil {
-		return fullPath
+		return fullPath, false
 	}
-	return "Pages/404.html"
+	secretPath := "Pages/Auth/" + path + ".html"
+	if _, err := os.Stat(secretPath); err == nil {
+		return secretPath, true
+	}
+	return "Pages/404.html", false
 }
 
 func getFromCache(path string) (string, bool) {
