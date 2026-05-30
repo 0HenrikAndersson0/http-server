@@ -36,13 +36,13 @@ Create or modify `conf.json` in the root directory:
 ```json
 {
   "port": 1337,
-  "certFile": "/Users/henrikandersson/Developer/go/api/cert.pem",
-  "certKey": "/Users/henrikandersson/Developer/go/api/key.pem",
+  "certFile": "cert.pem",
+  "certKey": "key.pem",
   "isFileServer": false,
   "fileServerRootPath": "Files",
-  "secretPassword": "01010abc1230202",
-  "secretUserName": "s3cReT",
-  "hmacSampleSecret": "iamsecret"
+  "secretPassword": "password here",
+  "secretUserName": "username here",
+  "hmacSampleSecret": "secret here"
 }
 ```
 
@@ -50,6 +50,9 @@ Create or modify `conf.json` in the root directory:
 *   `certFile` / `certKey`: Paths to SSL certificate files. Leave empty for HTTP.
 *   `isFileServer`: If `true`, the root URL (`/`) displays the dynamic file list.
 *   `fileServerRootPath`: The directory name for served assets.
+*   `secretPassword`: Password for admin
+*   `secretUserName`: Username for admin
+*   `hmacSampleSecret`: JWT secret
 
 ### 3. Authentication
 

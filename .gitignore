@@ -35,3 +35,6 @@ Thumbs.db
 *.key
 cert.pem
 key.pem
+
+# Configuration
+conf.json
