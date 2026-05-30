@@ -1,15 +1,22 @@
 package server
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
-var PageCache = make(map[string]string)
+var PageCache sync.Map
 
 func GetFromCache(path string) (string, bool) {
-	content, exists := PageCache[path]
+	content, exists := PageCache.Load(path)
 	if exists {
 		fmt.Printf("Cache hit for path: %s\n", path)
 	} else {
 		fmt.Printf("Cache miss for path: %s\n", path)
 	}
-	return content, exists
+	return content.(string), exists
+}
+
+func WriteToCache(path string) {
+	PageCache.Store(path, path)
 }
