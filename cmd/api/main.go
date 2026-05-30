@@ -11,6 +11,14 @@ import (
 	"strconv"
 )
 
+func LogHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("incoming request: Method:%s Path:%s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+		log.Printf("Loaded RemoteAddr: %s", r.RemoteAddr)
+	})
+}
+
 func main() {
 	mux := http.NewServeMux()
 	cfg, err := config.ReadConfig()
@@ -19,20 +27,20 @@ func main() {
 		return
 	}
 
-	mux.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /login", LogHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/templates/logIn.html")
-	})
+	})))
 
-	mux.HandleFunc("POST /login", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("POST /login", LogHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		isValid := auth.FormAuthValidation(r, cfg)
 		if !isValid {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 		}
 		auth.SetJWTCookie(w, cfg)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-	})
+	})))
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/", LogHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path, _ := getPathAndQuery(r)
 
 		// If we are in File Server mode, serve the generated list for the root
@@ -61,9 +69,9 @@ func main() {
 		}
 		fmt.Printf("Serving: %s\n", page)
 		http.ServeFile(w, r, page)
-	})
+	})))
 
-	mux.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/logout", LogHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie := &http.Cookie{
 			Name:   "auth_token",
 			Value:  "",
@@ -73,7 +81,7 @@ func main() {
 		http.SetCookie(w, cookie)
 		fmt.Printf("User logged out\n")
 		http.Redirect(w, r, "/logIn", http.StatusSeeOther)
-	})
+	})))
 
 	fmt.Printf("Starting server on :%d...\n", cfg.Port)
 	startServer(cfg, mux)
