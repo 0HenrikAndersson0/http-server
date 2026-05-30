@@ -38,18 +38,20 @@ Create or modify `conf.json` in the root directory:
   "port": 8080,
   "certFile": "cert.pem",
   "certKey": "key.pem",
-  "isFileServer": false
+  "isFileServer": false,
+  "fileServerRootPath": "Files"
 }
 ```
 
 *   `port`: The port number for the server to listen on.
 *   `certFile` / `certKey`: Paths to SSL certificate files for HTTPS. Leave empty for HTTP.
-*   `isFileServer`: If `true`, the root URL (`/`) will display a dynamic list of files from the `Files/` directory.
+*   `isFileServer`: If `true`, the root URL (`/`) will display a dynamic list of files.
+*   `fileServerRootPath`: The name of the directory containing the files to serve (defaults to "Files").
 
 ### 3. File Server Mode
 
 When `isFileServer` is set to `true`:
-- Navigating to `/` will show a styled list of all assets inside the `Files/` folder.
+- Navigating to `/` will show a styled list of all assets inside the directory specified by `fileServerRootPath`.
 - Files can be downloaded directly by clicking their names.
 - Static pages in `Pages/` remain accessible via their specific paths (e.g., `/main` or `/test`).
 
