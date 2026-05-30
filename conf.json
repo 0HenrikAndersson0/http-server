@@ -1,5 +1,7 @@
 {
   "port": 1337,
   "certFile": "/Users/henrikandersson/Developer/go/api/cert.pem",
-  "certKey": "/Users/henrikandersson/Developer/go/api/key.pem"
+  "certKey": "/Users/henrikandersson/Developer/go/api/key.pem",
+  "isFileServer": true,
+  "fileServerRootPath": "Files"
 }

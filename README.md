@@ -2,12 +2,12 @@
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/452f460a-24a8-4363-a6ad-1c96892b0b2f" />
 
-
-A simple, lightweight Go web server designed to serve static HTML pages with support for both HTTP and HTTPS.
+A simple, lightweight Go web server designed to serve static HTML pages with support for both HTTP and HTTPS, and a dynamic file-sharing mode.
 
 ## Features
 
 - **Static Page Serving:** Automatically routes requests to HTML files in the `Pages/` directory.
+- **Dynamic File Listing:** Automatically generates an index of files available in the `Files/` directory.
 - **Dual Protocol Support:** Seamlessly switches between HTTP and HTTPS based on configuration.
 - **JSON Configuration:** Easy setup via `conf.json`.
 - **404 Handling:** Custom 404 page support.
@@ -37,13 +37,23 @@ Create or modify `conf.json` in the root directory:
 {
   "port": 8080,
   "certFile": "cert.pem",
-  "certKey": "key.pem"
+  "certKey": "key.pem",
+  "isFileServer": false
 }
 ```
 
-*Note: Leave `certFile` and `certKey` empty to run as a standard HTTP server.*
+*   `port`: The port number for the server to listen on.
+*   `certFile` / `certKey`: Paths to SSL certificate files for HTTPS. Leave empty for HTTP.
+*   `isFileServer`: If `true`, the root URL (`/`) will display a dynamic list of files from the `Files/` directory.
 
-### 3. Generating SSL Certificates (Optional)
+### 3. File Server Mode
+
+When `isFileServer` is set to `true`:
+- Navigating to `/` will show a styled list of all assets inside the `Files/` folder.
+- Files can be downloaded directly by clicking their names.
+- Static pages in `Pages/` remain accessible via their specific paths (e.g., `/main` or `/test`).
+
+### 4. Generating SSL Certificates (Optional)
 
 To test HTTPS locally, generate a self-signed certificate:
 
@@ -51,21 +61,22 @@ To test HTTPS locally, generate a self-signed certificate:
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes -subj "/CN=localhost"
 ```
 
-### 4. Running the Server
+### 5. Running the Server
 
 ```bash
 go run main.go
 ```
 
-The server will start on the port specified in `conf.json`.
-
 ## Project Structure
 
 - `main.go`: The core server logic and request handling.
 - `conf.json`: Configuration settings for the server.
-- `Pages/`: Directory containing `.html` files (e.g., `main.html`, `test.html`, `404.html`).
+- `Pages/`: Directory containing static `.html` files.
+- `Files/`: Directory containing assets available for download.
+- `FileList.html`: The HTML template used for the dynamic file listing.
 - `.gitignore`: Standard Go and environment exclusions.
 
 ## Development
 
-To add a new page, simply create a new `.html` file inside the `Pages/` directory. For example, creating `Pages/about.html` will make it accessible at `http://localhost:port/about`.
+- **Add a Page:** Create a new `.html` file in `Pages/` (e.g., `Pages/about.html` -> `/about`).
+- **Add an Asset:** Drop any file into `Files/` to make it appear in the File Server index.
