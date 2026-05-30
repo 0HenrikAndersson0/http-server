@@ -1,4 +1,4 @@
-# Go API Lab
+# Go Web server
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/452f460a-24a8-4363-a6ad-1c96892b0b2f" />
 
@@ -36,10 +36,13 @@ Create or modify `conf.json` in the root directory:
 ```json
 {
   "port": 1337,
-  "certFile": "cert.pem",
-  "certKey": "key.pem",
-  "isFileServer": true,
-  "fileServerRootPath": "Files"
+  "certFile": "/Users/henrikandersson/Developer/go/api/cert.pem",
+  "certKey": "/Users/henrikandersson/Developer/go/api/key.pem",
+  "isFileServer": false,
+  "fileServerRootPath": "Files",
+  "secretPassword": "01010abc1230202",
+  "secretUserName": "s3cReT",
+  "hmacSampleSecret": "iamsecret"
 }
 ```
 
@@ -54,7 +57,6 @@ The server includes a built-in JWT authentication system:
 - **Login:** Access `/logIn` to enter credentials.
 - **Security:** Upon successful login, a JWT is issued as an `HttpOnly` cookie.
 - **Protected Area:** Accessing `/Auth/IamSecret` requires a valid token.
-- **Logout:** Use `/logout` to terminate the session.
 
 ### 4. File Server Mode
 
